@@ -1,6 +1,8 @@
 package main
 
 import "fmt"
+import "bytes"
+import "encoding/json"
 
 type FunctionId uint64
 type CallId uint64
@@ -11,87 +13,136 @@ type Line int64
 
 type RecordEvent interface {
 	isRecordEvent() bool
+	MarshalJson() ([]byte, error)
 }
 
+/// steps
 type StepRecord struct {
-	pathId PathId
-	line   Line
+	PathId PathId `json:"pathId"`
+	Line   Line   `json:"line"`
 }
 
 func (s StepRecord) isRecordEvent() bool {
 	return true
 }
 
-// ====
+type RawStepRecord struct {
+	Step StepRecord
+}
+
+func (receiver StepRecord) MarshalJson() ([]byte, error) {
+	return json.Marshal(RawStepRecord { receiver })
+}
+
+// functionrrecords
 
 type FunctionRecord struct {
-	name   string
-	pathId PathId
-	line   Line
+	Name   string `json:"name"`
+	PathId PathId `json:"pathId"`
+	Line   Line   `json:"line"`
 }
 
 func (r FunctionRecord) isRecordEvent() bool {
 	return true
 }
 
-// ====
-
-type ValueRecord interface {
-	isValueRecord() bool
+type RawFunctionRecord struct {
+	Function FunctionRecord
 }
 
-type NilValueRecord struct {
+func (receiver FunctionRecord) MarshalJson() ([]byte, error) {
+	return json.Marshal(RawFunctionRecord { receiver })
 }
 
-func (n NilValueRecord) isValueRecord() bool {
-	return true
-}
 
 type ArgRecord struct {
-	name  string
-	value ValueRecord
+	Name  string       `json:"name"`
+	Value ValueRecord  `json:"value"`
+}
+
+func (receiver ArgRecord) MarshalJson() ([]byte, error) {
+	return json.Marshal(receiver)
 }
 
 type CallRecord struct {
-	functionId FunctionId
-	args       []ArgRecord
+	FunctionId FunctionId    `json:"functionId"`
+	Args       []ArgRecord   `json:"args"`
 }
 
 func (c CallRecord) isRecordEvent() bool {
 	return true
 }
 
+type RawCallRecord struct {
+	Call CallRecord
+}
+
+
+func (receiver CallRecord) MarshalJson() ([]byte, error) {
+	return json.Marshal(RawCallRecord { receiver })
+}
+
 // ====
 
 type ReturnRecord struct {
-	returnValue ValueRecord
+	ReturnValue ValueRecord    `json:"return_value"`
+}
+
+type RawReturnRecord struct {
+	Return ReturnRecord
 }
 
 func (r ReturnRecord) isRecordEvent() bool {
 	return true
 }
 
+func (receiver ReturnRecord) MarshalJson() ([]byte, error) {
+	return json.Marshal(RawReturnRecord { receiver })
+}
+
 // ====
 
 type PathRecord string
+
+type RawPathRecord struct {
+	Path PathRecord
+}
 
 func (p PathRecord) isRecordEvent() bool {
 	return true
 }
 
+func (receiver PathRecord) MarshalJson() ([]byte, error) {
+	return json.Marshal(RawPathRecord { receiver })
+}
+
 // ====
+
+type RawTypeRecord struct {
+	Type TypeRecord
+}
+
+func (r RawTypeRecord) isRecordEvent() bool {
+	return true
+}
+
+func (receiver RawTypeRecord) MarshalJson() ([]byte, error) {
+	return json.Marshal(receiver)
+}
 
 type TraceRecord struct {
 	events    []RecordEvent
 	functions map[string]FunctionId
 	paths     map[string]PathId
+	types     map[string]TypeId
 }
 
 func MakeTraceRecord() TraceRecord {
 	events := make([]RecordEvent, 0)
 	functions := make(map[string]FunctionId, 0)
 	paths := make(map[string]PathId, 0)
-	return TraceRecord{events, functions, paths}
+	types := make(map[string]TypeId, 0)
+	return TraceRecord{ events, functions, paths, types }
 }
 
 func (t *TraceRecord) Register(event RecordEvent) {
@@ -147,6 +198,14 @@ func (t *TraceRecord) EnsurePathId(path string) PathId {
 	return pathId
 }
 
+
+func (t *TraceRecord) RegisterTypeWithNewId(name string, typeRecord TypeRecord) TypeId {
+	newTypeId := TypeId(len(t.types))
+	t.types[name] = newTypeId
+	t.Register(RawTypeRecord { typeRecord })
+	return newTypeId
+}
+
 func main() {
 	record := MakeTraceRecord()
 
@@ -156,9 +215,37 @@ func main() {
 	if record.RegisterPathWithNewId("path1") != PathId(1) {
 		panic("expected PathId 1 for path1")
 	}
+
 	record.RegisterStep(PathId(0), Line(1))
 	record.RegisterCall("example", PathId(1), Line(1))
-	record.RegisterReturn(NilValueRecord{})
 
-	fmt.Println(record)
+	if record.RegisterTypeWithNewId("Int", NewSimpleTypeRecord(INT_TYPE_KIND, "Int")) != TypeId(0) {
+		panic("expected TypeId 0 for type Int")
+	}
+
+	record.RegisterReturn(IntValue(1, TypeId(0)))
+
+	// fmt.Println(record)
+
+	var jsonEvents bytes.Buffer
+	jsonEvents.WriteString("[\n")
+	for i, event := range record.events {
+		raw, err := event.MarshalJson()
+		if err != nil {
+			fmt.Println("json error: ", err)
+		} else {
+			text := string(raw[:])
+			jsonEvents.WriteString("    ")
+			jsonEvents.WriteString(text)
+			if i < len(record.events) - 1 {
+				jsonEvents.WriteString(",\n")
+			} else {
+				jsonEvents.WriteString("\n")
+			}
+		}
+	}
+	jsonEvents.WriteString("]\n")
+	jsonText := jsonEvents.String()
+	fmt.Println(jsonText)
+
 }

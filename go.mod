@@ -1,3 +1,3 @@
-module trace_record
+module github.com/metacraft-labs/trace_record
 
 go 1.22
