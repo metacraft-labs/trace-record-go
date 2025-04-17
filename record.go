@@ -2,6 +2,8 @@ package trace_record
 
 import "fmt"
 import "bytes"
+import "os"
+import "path/filepath"
 import "encoding/json"
 
 type FunctionId uint64
@@ -149,13 +151,24 @@ func (t *TraceRecord) Register(event RecordEvent) {
 	t.events = append(t.events, event)
 }
 
-func (t *TraceRecord) RegisterStep(pathId PathId, line Line) {
+func (t *TraceRecord) RegisterStepWithPathId(pathId PathId, line Line) {
 	step := StepRecord{pathId, line}
 	t.Register(step)
 }
 
-func (t *TraceRecord) RegisterCall(name string, functionPathId PathId, functionStartLine Line) {
-	functionId := t.EnsureFunctionId(name, functionPathId, functionStartLine)
+func (t *TraceRecord) RegisterStep(path string, line Line) {
+	pathId := t.EnsurePathId(path)
+	t.RegisterStepWithPathId(pathId, line)
+}
+
+// naming copied from DWARF: definition path and definition line
+func (t *TraceRecord) RegisterCall(name string, definitionPath string, definitionLine Line) {
+	definitionPathId := t.EnsurePathId(definitionPath)
+	t.RegisterCallWithPathId(name, definitionPathId, definitionLine)
+}
+
+func (t *TraceRecord) RegisterCallWithPathId(name string, definitionPathId PathId, definitionLine Line) {
+	functionId := t.EnsureFunctionId(name, definitionPathId, definitionLine)
 	call := CallRecord{functionId, make([]ArgRecord, 0)}
 	t.Register(call)
 }
@@ -206,33 +219,14 @@ func (t *TraceRecord) RegisterTypeWithNewId(name string, typeRecord TypeRecord) 
 	return newTypeId
 }
 
-func main() {
-	record := MakeTraceRecord()
-
-	if record.RegisterPathWithNewId("path0") != PathId(0) {
-		panic("expected PathId 0 for path0")
-	}
-	if record.RegisterPathWithNewId("path1") != PathId(1) {
-		panic("expected PathId 1 for path1")
-	}
-
-	record.RegisterStep(PathId(0), Line(1))
-	record.RegisterCall("example", PathId(1), Line(1))
-
-	if record.RegisterTypeWithNewId("Int", NewSimpleTypeRecord(INT_TYPE_KIND, "Int")) != TypeId(0) {
-		panic("expected TypeId 0 for type Int")
-	}
-
-	record.RegisterReturn(IntValue(1, TypeId(0)))
-
-	// fmt.Println(record)
-
+func (record *TraceRecord) SerializeEventsToJson() ([]byte, error) {
 	var jsonEvents bytes.Buffer
 	jsonEvents.WriteString("[\n")
 	for i, event := range record.events {
 		raw, err := event.MarshalJson()
 		if err != nil {
-			fmt.Println("json error: ", err)
+			var empty []byte
+			return empty, err
 		} else {
 			text := string(raw[:])
 			jsonEvents.WriteString("    ")
@@ -245,7 +239,34 @@ func main() {
 		}
 	}
 	jsonEvents.WriteString("]\n")
-	jsonText := jsonEvents.String()
-	fmt.Println(jsonText)
+	// jsonText := jsonEvents.String()
+	jsonBytes := jsonEvents.Bytes()
+	return jsonBytes, nil
+	// fmt.Println(jsonText)
+	
+}
 
+
+func (record *TraceRecord) ProduceTrace(directory string) error { 
+	// TODO : augment errors, instead of printing
+
+	jsonBytes, err := record.SerializeEventsToJson()
+	if err != nil {
+		return err
+	}
+
+	err = os.MkdirAll(directory, os.ModePerm)
+	if err != nil {
+		fmt.Println("error: couldn't ensure trace directory exists or make it: ", err)
+		return err
+	}
+
+	err = os.WriteFile(filepath.Join(directory, "trace.json"), jsonBytes, 0644)
+	if err != nil {
+		fmt.Println("error: couldn't write trace.json: ", err)
+		return err
+	}
+
+	fmt.Println("generated trace in ", directory)
+	return nil
 }
