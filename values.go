@@ -1,4 +1,4 @@
-package main
+package trace_record
 
 // import "encoding/json"
 
