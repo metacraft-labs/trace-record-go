@@ -1,0 +1,26 @@
+package trace_record							
+
+func main() {
+	record := MakeTraceRecord()
+
+	if record.RegisterPathWithNewId("path0") != PathId(0) {
+		panic("expected PathId 0 for path0")
+	}
+	if record.RegisterPathWithNewId("path1") != PathId(1) {
+		panic("expected PathId 1 for path1")
+	}
+
+	record.RegisterStep("path0", Line(1))
+	record.RegisterCall("example", "path1", Line(1))
+
+	if record.RegisterTypeWithNewId("Int", NewSimpleTypeRecord(INT_TYPE_KIND, "Int")) != TypeId(0) {
+		panic("expected TypeId 0 for type Int")
+	}
+
+	record.RegisterReturn(IntValue(1, TypeId(0)))
+
+	directory := "trace/"
+	record.ProduceTrace(directory)
+	// fmt.Println(record)
+}
+
