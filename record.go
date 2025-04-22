@@ -20,7 +20,7 @@ type RecordEvent interface {
 
 /// steps
 type StepRecord struct {
-	PathId PathId `json:"pathId"`
+	PathId PathId `json:"path_id"`
 	Line   Line   `json:"line"`
 }
 
@@ -40,7 +40,7 @@ func (receiver StepRecord) MarshalJson() ([]byte, error) {
 
 type FunctionRecord struct {
 	Name   string `json:"name"`
-	PathId PathId `json:"pathId"`
+	PathId PathId `json:"path_id"`
 	Line   Line   `json:"line"`
 }
 
@@ -67,7 +67,7 @@ func (receiver ArgRecord) MarshalJson() ([]byte, error) {
 }
 
 type CallRecord struct {
-	FunctionId FunctionId    `json:"functionId"`
+	FunctionId FunctionId    `json:"function_id"`
 	Args       []ArgRecord   `json:"args"`
 }
 
@@ -219,6 +219,12 @@ func (t *TraceRecord) RegisterTypeWithNewId(name string, typeRecord TypeRecord) 
 	return newTypeId
 }
 
+type TraceMetadata struct {
+	Workdir string `json:"workdir"`
+	Program string `json:"program"`
+	Args []string `json:"args"`
+}
+
 func (record *TraceRecord) SerializeEventsToJson() ([]byte, error) {
 	var jsonEvents bytes.Buffer
 	jsonEvents.WriteString("[\n")
@@ -247,7 +253,7 @@ func (record *TraceRecord) SerializeEventsToJson() ([]byte, error) {
 }
 
 
-func (record *TraceRecord) ProduceTrace(directory string) error { 
+func (record *TraceRecord) ProduceTrace(traceDirectory string, workdir string) error { 
 	// TODO : augment errors, instead of printing
 
 	jsonBytes, err := record.SerializeEventsToJson()
@@ -255,18 +261,54 @@ func (record *TraceRecord) ProduceTrace(directory string) error {
 		return err
 	}
 
-	err = os.MkdirAll(directory, os.ModePerm)
+	err = os.MkdirAll(traceDirectory, os.ModePerm)
 	if err != nil {
 		fmt.Println("error: couldn't ensure trace directory exists or make it: ", err)
 		return err
 	}
 
-	err = os.WriteFile(filepath.Join(directory, "trace.json"), jsonBytes, 0644)
+	err = os.WriteFile(filepath.Join(traceDirectory, "trace.json"), jsonBytes, 0644)
 	if err != nil {
 		fmt.Println("error: couldn't write trace.json: ", err)
 		return err
 	}
 
-	fmt.Println("generated trace in ", directory)
+	var args []string = make([]string, 0)
+	traceMetadata := TraceMetadata {workdir, "", args }
+	traceMetadataJson, err := json.Marshal(traceMetadata)
+	if err != nil {
+		fmt.Println("error: encoding trace metadata: ", err)
+		return err
+	}
+	// fmt.Println(traceMetadataJson)
+	err = os.WriteFile(filepath.Join(traceDirectory, "trace_metadata.json"), traceMetadataJson, 0644)
+	if err != nil {
+		fmt.Println("error: couldn't write trace_metadata.json: ", err)
+		return err
+	}
+
+	paths := make([]string, 0)
+	for _, event := range record.events {
+		switch event.(type) {
+		case PathRecord:
+			pathRecord, _ := event.(PathRecord) // fmt.Fprint("%v", event)
+			path := string(pathRecord)
+			paths = append(paths, path)
+		default:
+			// nothing
+		}
+	}
+	pathsJson, err := json.Marshal(paths)
+	if err != nil {
+		fmt.Println("error: encoding trace paths: ", err)
+		return err
+	}
+	err = os.WriteFile(filepath.Join(traceDirectory, "trace_paths.json"), pathsJson, 0644)
+	if err != nil {
+		fmt.Println("error: couldn't write trace_paths.json: ", err)
+		return err
+	}
+
+	fmt.Println("generated trace in ", traceDirectory)
 	return nil
 }
