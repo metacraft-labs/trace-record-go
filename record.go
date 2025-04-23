@@ -253,7 +253,7 @@ func (record *TraceRecord) SerializeEventsToJson() ([]byte, error) {
 }
 
 
-func (record *TraceRecord) ProduceTrace(traceDirectory string, workdir string) error { 
+func (record *TraceRecord) ProduceTrace(traceDirectory string, programName string, workdir string) error { 
 	// TODO : augment errors, instead of printing
 
 	jsonBytes, err := record.SerializeEventsToJson()
@@ -274,7 +274,7 @@ func (record *TraceRecord) ProduceTrace(traceDirectory string, workdir string) e
 	}
 
 	var args []string = make([]string, 0)
-	traceMetadata := TraceMetadata {workdir, "", args }
+	traceMetadata := TraceMetadata {workdir, programName, args }
 	traceMetadataJson, err := json.Marshal(traceMetadata)
 	if err != nil {
 		fmt.Println("error: encoding trace metadata: ", err)

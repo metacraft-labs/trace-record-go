@@ -32,7 +32,7 @@ func TestTraceRecordHelpers(t *testing.T) {
 	record.RegisterReturn(ct.IntValue(1, ct.TypeId(0)))
 
 	directory := "trace/"
-	err := record.ProduceTrace(directory, workdir)
+	err := record.ProduceTrace(directory, "test_program", workdir)
 	if err != nil {
 		t.Errorf("producing trace error: %v", err)
 	}
