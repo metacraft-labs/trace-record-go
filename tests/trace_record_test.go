@@ -21,15 +21,18 @@ func TestTraceRecordHelpers(t *testing.T) {
 		t.Errorf("expected PathId 1 for path1")
 	}
 
-	record.RegisterCall("<toplevel>", path0, ct.Line(0))
-	record.RegisterStep(path0, ct.Line(1))
-	record.RegisterCall("example", path1, ct.Line(1))
-
-	if record.RegisterTypeWithNewId("Int", ct.NewSimpleTypeRecord(ct.INT_TYPE_KIND, "Int")) != ct.TypeId(0) {
+	intTypeRecord := ct.NewSimpleTypeRecord(ct.INT_TYPE_KIND, "Int")
+	if record.RegisterTypeWithNewId("Int", intTypeRecord) != ct.TypeId(0) {
 		t.Errorf("expected TypeId 0 for type Int")
 	}
 
-	record.RegisterReturn(ct.IntValue(1, ct.TypeId(0)))
+	record.RegisterCall("<toplevel>", path0, ct.Line(0))
+	record.RegisterStep(path0, ct.Line(1))
+	record.RegisterVariable("a", ct.IntValue(1, ct.TypeId(0)))
+
+	record.RegisterCall("example", path1, ct.Line(1))
+
+	record.RegisterReturn(ct.IntValue(1, record.EnsureTypeId("Int", intTypeRecord)))
 
 	directory := "trace/"
 	err := record.ProduceTrace(directory, "test_program", workdir)

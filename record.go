@@ -102,6 +102,39 @@ func (receiver ReturnRecord) MarshalJson() ([]byte, error) {
 	return json.Marshal(RawReturnRecord { receiver })
 }
 
+/// ===
+
+type VariableNameRecord struct {
+	VariableName string
+}
+
+func (v VariableNameRecord) isRecordEvent() bool {
+	return true
+}
+
+func (receiver VariableNameRecord) MarshalJson() ([]byte, error) {
+	return json.Marshal(receiver)
+}
+
+// ===
+
+type FullValueRecord struct {
+	VariableId VariableId `json:"variable_id"`
+	Value ValueRecord `json:"value"`
+}
+
+type RawValueRecord struct {
+	Value FullValueRecord
+}
+func (r FullValueRecord) isRecordEvent() bool {
+	return true
+}
+
+func (receiver FullValueRecord) MarshalJson() ([]byte, error) {
+	r := RawValueRecord{receiver}
+	return json.Marshal(r)
+}
+
 // ====
 
 type PathRecord string
@@ -136,6 +169,7 @@ type TraceRecord struct {
 	events    []RecordEvent
 	functions map[string]FunctionId
 	paths     map[string]PathId
+	variables map[string]VariableId
 	types     map[string]TypeId
 }
 
@@ -143,8 +177,9 @@ func MakeTraceRecord() TraceRecord {
 	events := make([]RecordEvent, 0)
 	functions := make(map[string]FunctionId, 0)
 	paths := make(map[string]PathId, 0)
+	variables := make(map[string]VariableId, 0)
 	types := make(map[string]TypeId, 0)
-	return TraceRecord{ events, functions, paths, types }
+	return TraceRecord{ events, functions, paths, variables, types }
 }
 
 func (t *TraceRecord) Register(event RecordEvent) {
@@ -195,6 +230,32 @@ func (t *TraceRecord) RegisterReturn(returnValue ValueRecord) {
 	t.Register(r)
 }
 
+func (t *TraceRecord) RegisterVariableNameWithNewId(name string) VariableId {
+	r := VariableNameRecord{name}
+	t.Register(r)
+	newVariableId := VariableId(len(t.variables))
+	t.variables[name] = newVariableId
+	return newVariableId
+}
+
+func (t *TraceRecord) EnsureVariableId(name string) VariableId {
+	variableId, ok := t.variables[name]
+	if !ok {
+		variableId = t.RegisterVariableNameWithNewId(name)
+	}
+	return variableId
+}
+
+func (t *TraceRecord) RegisterFullValue(variableId VariableId, value ValueRecord) {
+	r := FullValueRecord{variableId, value}
+	t.Register(r)
+}
+
+func (t *TraceRecord) RegisterVariable(name string, value ValueRecord) {
+	variableId := t.EnsureVariableId(name)
+	t.RegisterFullValue(variableId, value)
+}
+
 func (t *TraceRecord) RegisterPathWithNewId(path string) PathId {
 	newPathId := PathId(len(t.paths))
 	t.paths[path] = newPathId
@@ -217,6 +278,14 @@ func (t *TraceRecord) RegisterTypeWithNewId(name string, typeRecord TypeRecord) 
 	t.types[name] = newTypeId
 	t.Register(RawTypeRecord { typeRecord })
 	return newTypeId
+}
+
+func (t *TraceRecord) EnsureTypeId(name string, typeRecord TypeRecord) TypeId {
+	typeId, ok := t.types[name]
+	if !ok {
+		typeId = t.RegisterTypeWithNewId(name, typeRecord)
+	}
+	return typeId
 }
 
 type TraceMetadata struct {
