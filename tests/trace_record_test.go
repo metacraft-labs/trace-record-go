@@ -32,6 +32,8 @@ func TestTraceRecordHelpers(t *testing.T) {
 
 	record.RegisterCall("example", path1, ct.Line(1))
 
+	record.RegisterRecordEvent(ct.EventKindWriteOther, "write_bytes: #52", "0000x")
+
 	record.RegisterReturn(ct.IntValue(1, record.EnsureTypeId("Int", intTypeRecord)))
 
 	directory := "trace/"

@@ -137,6 +137,48 @@ func (receiver FullValueRecord) MarshalJson() ([]byte, error) {
 
 // ====
 
+type RecordEventKind int
+
+const (
+	EventKindWrite RecordEventKind = iota
+	EventKindWriteFile
+	EventKindWriteOther 
+	EventKindRead
+	EventKindReadFile
+	EventKindReadOther
+	// not generated yet in most recorders
+	EventKindReadDir
+	EventKindOpenDir
+	EventKindCloseDir
+	EventKindSocket
+	EventKindOpen
+	// errors/exceptions/signals
+	EventKindError
+	// used for trace events
+	EventKindTraceLogEvent
+	// TODO others
+)
+
+type RecordEventRecord struct {
+	Kind RecordEventKind `json:"kind"`
+	Metadata string `json:"metadata"`
+	Content string `json:"content"`
+}
+
+type RawRecordEventRecord struct {
+	Event RecordEventRecord
+}
+
+func (r RecordEventRecord) isRecordEvent() bool {
+	return true
+}
+
+func (receiver RecordEventRecord) MarshalJson() ([]byte, error) {
+	return json.Marshal(RawRecordEventRecord { receiver })
+}
+
+// ====
+
 type PathRecord string
 
 type RawPathRecord struct {
@@ -254,6 +296,11 @@ func (t *TraceRecord) RegisterFullValue(variableId VariableId, value ValueRecord
 func (t *TraceRecord) RegisterVariable(name string, value ValueRecord) {
 	variableId := t.EnsureVariableId(name)
 	t.RegisterFullValue(variableId, value)
+}
+
+func (t *TraceRecord) RegisterRecordEvent(kind RecordEventKind, metadata string, content string) {
+	event := RecordEventRecord {kind, metadata, content}
+	t.Register(event)
 }
 
 func (t *TraceRecord) RegisterPathWithNewId(path string) PathId {
