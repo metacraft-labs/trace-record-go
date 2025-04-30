@@ -18,7 +18,7 @@ type RecordEvent interface {
 	MarshalJson() ([]byte, error)
 }
 
-/// steps
+// / steps
 type StepRecord struct {
 	PathId PathId `json:"path_id"`
 	Line   Line   `json:"line"`
@@ -33,7 +33,7 @@ type RawStepRecord struct {
 }
 
 func (receiver StepRecord) MarshalJson() ([]byte, error) {
-	return json.Marshal(RawStepRecord { receiver })
+	return json.Marshal(RawStepRecord{receiver})
 }
 
 // functionrrecords
@@ -53,13 +53,12 @@ type RawFunctionRecord struct {
 }
 
 func (receiver FunctionRecord) MarshalJson() ([]byte, error) {
-	return json.Marshal(RawFunctionRecord { receiver })
+	return json.Marshal(RawFunctionRecord{receiver})
 }
 
-
 type ArgRecord struct {
-	Name  string       `json:"name"`
-	Value ValueRecord  `json:"value"`
+	Name  string      `json:"name"`
+	Value ValueRecord `json:"value"`
 }
 
 func (receiver ArgRecord) MarshalJson() ([]byte, error) {
@@ -67,8 +66,8 @@ func (receiver ArgRecord) MarshalJson() ([]byte, error) {
 }
 
 type CallRecord struct {
-	FunctionId FunctionId    `json:"function_id"`
-	Args       []ArgRecord   `json:"args"`
+	FunctionId FunctionId  `json:"function_id"`
+	Args       []ArgRecord `json:"args"`
 }
 
 func (c CallRecord) isRecordEvent() bool {
@@ -79,15 +78,14 @@ type RawCallRecord struct {
 	Call CallRecord
 }
 
-
 func (receiver CallRecord) MarshalJson() ([]byte, error) {
-	return json.Marshal(RawCallRecord { receiver })
+	return json.Marshal(RawCallRecord{receiver})
 }
 
 // ====
 
 type ReturnRecord struct {
-	ReturnValue ValueRecord    `json:"return_value"`
+	ReturnValue ValueRecord `json:"return_value"`
 }
 
 type RawReturnRecord struct {
@@ -99,7 +97,7 @@ func (r ReturnRecord) isRecordEvent() bool {
 }
 
 func (receiver ReturnRecord) MarshalJson() ([]byte, error) {
-	return json.Marshal(RawReturnRecord { receiver })
+	return json.Marshal(RawReturnRecord{receiver})
 }
 
 /// ===
@@ -119,13 +117,14 @@ func (receiver VariableNameRecord) MarshalJson() ([]byte, error) {
 // ===
 
 type FullValueRecord struct {
-	VariableId VariableId `json:"variable_id"`
-	Value ValueRecord `json:"value"`
+	VariableId VariableId  `json:"variable_id"`
+	Value      ValueRecord `json:"value"`
 }
 
 type RawValueRecord struct {
 	Value FullValueRecord
 }
+
 func (r FullValueRecord) isRecordEvent() bool {
 	return true
 }
@@ -142,7 +141,7 @@ type RecordEventKind int
 const (
 	EventKindWrite RecordEventKind = iota
 	EventKindWriteFile
-	EventKindWriteOther 
+	EventKindWriteOther
 	EventKindRead
 	EventKindReadFile
 	EventKindReadOther
@@ -160,9 +159,9 @@ const (
 )
 
 type RecordEventRecord struct {
-	Kind RecordEventKind `json:"kind"`
-	Metadata string `json:"metadata"`
-	Content string `json:"content"`
+	Kind     RecordEventKind `json:"kind"`
+	Metadata string          `json:"metadata"`
+	Content  string          `json:"content"`
 }
 
 type RawRecordEventRecord struct {
@@ -174,7 +173,7 @@ func (r RecordEventRecord) isRecordEvent() bool {
 }
 
 func (receiver RecordEventRecord) MarshalJson() ([]byte, error) {
-	return json.Marshal(RawRecordEventRecord { receiver })
+	return json.Marshal(RawRecordEventRecord{receiver})
 }
 
 // ====
@@ -190,7 +189,7 @@ func (p PathRecord) isRecordEvent() bool {
 }
 
 func (receiver PathRecord) MarshalJson() ([]byte, error) {
-	return json.Marshal(RawPathRecord { receiver })
+	return json.Marshal(RawPathRecord{receiver})
 }
 
 // ====
@@ -221,7 +220,7 @@ func MakeTraceRecord() TraceRecord {
 	paths := make(map[string]PathId, 0)
 	variables := make(map[string]VariableId, 0)
 	types := make(map[string]TypeId, 0)
-	return TraceRecord{ events, functions, paths, variables, types }
+	return TraceRecord{events, functions, paths, variables, types}
 }
 
 func (t *TraceRecord) Register(event RecordEvent) {
@@ -299,7 +298,7 @@ func (t *TraceRecord) RegisterVariable(name string, value ValueRecord) {
 }
 
 func (t *TraceRecord) RegisterRecordEvent(kind RecordEventKind, metadata string, content string) {
-	event := RecordEventRecord {kind, metadata, content}
+	event := RecordEventRecord{kind, metadata, content}
 	t.Register(event)
 }
 
@@ -319,11 +318,10 @@ func (t *TraceRecord) EnsurePathId(path string) PathId {
 	return pathId
 }
 
-
 func (t *TraceRecord) RegisterTypeWithNewId(name string, typeRecord TypeRecord) TypeId {
 	newTypeId := TypeId(len(t.types))
 	t.types[name] = newTypeId
-	t.Register(RawTypeRecord { typeRecord })
+	t.Register(RawTypeRecord{typeRecord})
 	return newTypeId
 }
 
@@ -336,9 +334,9 @@ func (t *TraceRecord) EnsureTypeId(name string, typeRecord TypeRecord) TypeId {
 }
 
 type TraceMetadata struct {
-	Workdir string `json:"workdir"`
-	Program string `json:"program"`
-	Args []string `json:"args"`
+	Workdir string   `json:"workdir"`
+	Program string   `json:"program"`
+	Args    []string `json:"args"`
 }
 
 func (record *TraceRecord) SerializeEventsToJson() ([]byte, error) {
@@ -353,7 +351,7 @@ func (record *TraceRecord) SerializeEventsToJson() ([]byte, error) {
 			text := string(raw[:])
 			jsonEvents.WriteString("    ")
 			jsonEvents.WriteString(text)
-			if i < len(record.events) - 1 {
+			if i < len(record.events)-1 {
 				jsonEvents.WriteString(",\n")
 			} else {
 				jsonEvents.WriteString("\n")
@@ -365,11 +363,10 @@ func (record *TraceRecord) SerializeEventsToJson() ([]byte, error) {
 	jsonBytes := jsonEvents.Bytes()
 	return jsonBytes, nil
 	// fmt.Println(jsonText)
-	
+
 }
 
-
-func (record *TraceRecord) ProduceTrace(traceDirectory string, programName string, workdir string) error { 
+func (record *TraceRecord) ProduceTrace(traceDirectory string, programName string, workdir string) error {
 	// TODO : augment errors, instead of printing
 
 	jsonBytes, err := record.SerializeEventsToJson()
@@ -390,7 +387,7 @@ func (record *TraceRecord) ProduceTrace(traceDirectory string, programName strin
 	}
 
 	var args []string = make([]string, 0)
-	traceMetadata := TraceMetadata {workdir, programName, args }
+	traceMetadata := TraceMetadata{workdir, programName, args}
 	traceMetadataJson, err := json.Marshal(traceMetadata)
 	if err != nil {
 		fmt.Println("error: encoding trace metadata: ", err)

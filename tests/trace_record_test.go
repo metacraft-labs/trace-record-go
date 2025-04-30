@@ -1,4 +1,4 @@
-package trace_record_test						
+package trace_record_test
 
 import (
 	"testing"
@@ -6,7 +6,6 @@ import (
 
 	ct "github.com/metacraft-labs/trace_record"
 )
-
 
 func TestTraceRecordHelpers(t *testing.T) {
 	record := ct.MakeTraceRecord()
@@ -43,4 +42,3 @@ func TestTraceRecordHelpers(t *testing.T) {
 	}
 	// fmt.Println(record)
 }
-
