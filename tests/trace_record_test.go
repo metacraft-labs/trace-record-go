@@ -35,6 +35,11 @@ func TestTraceRecordHelpers(t *testing.T) {
 
 	record.RegisterReturn(ct.IntValue(1, record.EnsureTypeId("Int", intTypeRecord)))
 
+	callsCount := record.CurrentCallsCount()
+	if callsCount := 2 {
+		t.Errorf("expected 2 calls, not %d", callsCount)
+	}
+
 	directory := "trace/"
 	err := record.ProduceTrace(directory, "test_program", workdir)
 	if err != nil {

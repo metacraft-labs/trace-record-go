@@ -212,6 +212,7 @@ type TraceRecord struct {
 	paths     map[string]PathId
 	variables map[string]VariableId
 	types     map[string]TypeId
+	currentCallsCount   int
 }
 
 func MakeTraceRecord() TraceRecord {
@@ -220,7 +221,8 @@ func MakeTraceRecord() TraceRecord {
 	paths := make(map[string]PathId, 0)
 	variables := make(map[string]VariableId, 0)
 	types := make(map[string]TypeId, 0)
-	return TraceRecord{events, functions, paths, variables, types}
+	currentCallsCount := 0
+	return TraceRecord{events, functions, paths, variables, types, currentCallsCount}
 }
 
 func (t *TraceRecord) Register(event RecordEvent) {
@@ -247,6 +249,11 @@ func (t *TraceRecord) RegisterCallWithPathId(name string, definitionPathId PathI
 	functionId := t.EnsureFunctionId(name, definitionPathId, definitionLine)
 	call := CallRecord{functionId, make([]ArgRecord, 0)}
 	t.Register(call)
+	t.currentCallsCount += 1
+}
+
+func (t *TraceRecord) CurrentCallsCount() int {
+	return t.currentCallsCount
 }
 
 func (t *TraceRecord) RegisterFunctionWithNewId(name string, pathId PathId, line Line) FunctionId {
