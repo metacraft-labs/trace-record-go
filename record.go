@@ -240,16 +240,20 @@ func (t *TraceRecord) RegisterStep(path string, line Line) {
 }
 
 // naming copied from DWARF: definition path and definition line
-func (t *TraceRecord) RegisterCall(name string, definitionPath string, definitionLine Line) {
+func (t *TraceRecord) RegisterCall(name string, definitionPath string, definitionLine Line, args []ArgRecord) {
 	definitionPathId := t.EnsurePathId(definitionPath)
-	t.RegisterCallWithPathId(name, definitionPathId, definitionLine)
+	t.RegisterCallWithPathId(name, definitionPathId, definitionLine, args)
 }
 
-func (t *TraceRecord) RegisterCallWithPathId(name string, definitionPathId PathId, definitionLine Line) {
+func (t *TraceRecord) RegisterCallWithPathId(name string, definitionPathId PathId, definitionLine Line, args []ArgRecord) {
 	functionId := t.EnsureFunctionId(name, definitionPathId, definitionLine)
-	call := CallRecord{functionId, make([]ArgRecord, 0)}
+	call := CallRecord{functionId, args}
 	t.Register(call)
 	t.currentCallsCount += 1
+}
+
+func Arg(name string, value ValueRecord) ArgRecord {
+	return ArgRecord {name, value}
 }
 
 func (t *TraceRecord) CurrentCallsCount() int {
