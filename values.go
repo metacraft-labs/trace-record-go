@@ -105,3 +105,29 @@ func (s StructValueRecord) IsValueRecord() {}
 func StructValue(fields []ValueRecord, typeId TypeId) StructValueRecord {
 	return StructValueRecord{"Struct", fields, typeId}
 }
+
+type SequenceValueRecord struct {
+	Kind     string        `json:"kind"`
+	Elements []ValueRecord `json:"elements"`
+	IsSlice  bool          `json:"is_slice"`
+	TypeId   TypeId        `json:"type_id"`
+}
+
+func (s SequenceValueRecord) IsValueRecord() {}
+
+func SequenceValue(elements []ValueRecord, isSlice bool, typeId TypeId) SequenceValueRecord {
+	return SequenceValueRecord{"Sequence", elements, isSlice, typeId}
+}
+
+type ReferenceValueRecord struct {
+	Kind         string      `json:"kind"`
+	Dereferenced ValueRecord `json:"dereferenced"`
+	Mutable      bool        `json:"mutable"`
+	TypeId       TypeId      `json:"type_id"`
+}
+
+func (s ReferenceValueRecord) IsValueRecord() {}
+
+func ReferenceValue(dereferenced ValueRecord, mutable bool, typeId TypeId) ReferenceValueRecord {
+	return ReferenceValueRecord{"Reference", dereferenced, mutable, typeId}
+}
