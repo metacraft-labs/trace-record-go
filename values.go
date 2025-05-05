@@ -28,6 +28,9 @@ func NewNonTypeSpecificInfo() NoneTypeSpecificInfo {
 }
 
 const INT_TYPE_KIND = TypeKind(7)
+const BOOL_TYPE_KIND = TypeKind(8)
+const STRING_TYPE_KIND = TypeKind(9)
+const STRUCT_TYPE_KIND = TypeKind(10)
 
 type TypeRecord struct {
 	Kind         TypeKind         `json:"kind"`
@@ -69,37 +72,38 @@ func IntValue(i int64, typeId TypeId) IntValueRecord {
 
 type BoolValueRecord struct {
 	Kind   string `json:"kind"`
-	I      bool   `json:"i"`
+	B      bool   `json:"b"`
 	TypeId TypeId `json:"type_id"`
 }
 
 func (b BoolValueRecord) IsValueRecord() {}
 
-func BoolValue(i bool, typeId TypeId) BoolValueRecord {
-	return BoolValueRecord{"Bool", i, typeId}
+func BoolValue(b bool, typeId TypeId) BoolValueRecord {
+	return BoolValueRecord{"Bool", b, typeId}
 }
 
 type StringValueRecord struct {
 	Kind   string `json:"kind"`
-	I      string `json:"i"`
+	Text   string `json:"text"`
 	TypeId TypeId `json:"type_id"`
 }
 
-func (b StringValueRecord) IsValueRecord() {}
+func (s StringValueRecord) IsValueRecord() {}
 
-func StringValue(i string, typeId TypeId) StringValueRecord {
-	return StringValueRecord{"String", i, typeId}
+func StringValue(text string, typeId TypeId) StringValueRecord {
+	return StringValueRecord{"String", text, typeId}
 }
 
 type StructValueRecord struct {
 	Kind   string `json:"kind"`
 	Fields []ValueRecord
+	TypeId TypeId `json:"type_id"`
 }
 
 func (s StructValueRecord) IsValueRecord() {}
 
-func StructValue(fields []ValueRecord) StructValueRecord {
-	return StructValueRecord{"Struct", fields}
+func StructValue(fields []ValueRecord, typeId TypeId) StructValueRecord {
+	return StructValueRecord{"Struct", fields, typeId}
 }
 
 // func (receiver NilValueRecord) MarshalJson() ([]byte, error) {
