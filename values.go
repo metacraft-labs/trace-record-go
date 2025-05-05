@@ -105,7 +105,3 @@ func (s StructValueRecord) IsValueRecord() {}
 func StructValue(fields []ValueRecord, typeId TypeId) StructValueRecord {
 	return StructValueRecord{"Struct", fields, typeId}
 }
-
-// func (receiver NilValueRecord) MarshalJson() ([]byte, error) {
-// 	return json.Marshal(
-// }

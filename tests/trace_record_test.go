@@ -1,6 +1,7 @@
 package trace_record_test
 
 import (
+	"fmt"
 	"testing"
 	// "fmt"
 
@@ -46,5 +47,5 @@ func TestTraceRecordHelpers(t *testing.T) {
 	if err != nil {
 		t.Errorf("producing trace error: %v", err)
 	}
-	// fmt.Println(record)
+	fmt.Println(record)
 }
