@@ -40,7 +40,7 @@ func NewSimpleTypeRecord(kind TypeKind, langType string) TypeRecord {
 }
 
 type ValueRecord interface {
-	IsValueRecord() bool
+	IsValueRecord()
 	// MarshalJson() ([]byte, error)
 }
 
@@ -49,9 +49,7 @@ type NilValueRecord struct {
 	TypeId TypeId `json:"type_id"`
 }
 
-func (n NilValueRecord) IsValueRecord() bool {
-	return true
-}
+func (n NilValueRecord) IsValueRecord() {}
 
 func NilValue() NilValueRecord {
 	return NilValueRecord{"None", TypeId(0)}
@@ -63,12 +61,45 @@ type IntValueRecord struct {
 	TypeId TypeId `json:"type_id"`
 }
 
-func (i IntValueRecord) IsValueRecord() bool {
-	return true
-}
+func (i IntValueRecord) IsValueRecord() {}
 
 func IntValue(i int64, typeId TypeId) IntValueRecord {
 	return IntValueRecord{"Int", i, typeId}
+}
+
+type BoolValueRecord struct {
+	Kind   string `json:"kind"`
+	I      bool   `json:"i"`
+	TypeId TypeId `json:"type_id"`
+}
+
+func (b BoolValueRecord) IsValueRecord() {}
+
+func BoolValue(i bool, typeId TypeId) BoolValueRecord {
+	return BoolValueRecord{"Bool", i, typeId}
+}
+
+type StringValueRecord struct {
+	Kind   string `json:"kind"`
+	I      string `json:"i"`
+	TypeId TypeId `json:"type_id"`
+}
+
+func (b StringValueRecord) IsValueRecord() {}
+
+func StringValue(i string, typeId TypeId) StringValueRecord {
+	return StringValueRecord{"String", i, typeId}
+}
+
+type StructValueRecord struct {
+	Kind   string `json:"kind"`
+	Fields []ValueRecord
+}
+
+func (s StructValueRecord) IsValueRecord() {}
+
+func StructValue(fields []ValueRecord) StructValueRecord {
+	return StructValueRecord{"Struct", fields}
 }
 
 // func (receiver NilValueRecord) MarshalJson() ([]byte, error) {
