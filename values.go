@@ -70,6 +70,18 @@ func IntValue(i int64, typeId TypeId) IntValueRecord {
 	return IntValueRecord{"Int", i, typeId}
 }
 
+type FloatValueRecord struct {
+	Kind   string  `json:"kind"`
+	F      float64 `json:"f"`
+	TypeId TypeId  `json:"type_id"`
+}
+
+func (i FloatValueRecord) IsValueRecord() {}
+
+func FloatValue(f float64, typeId TypeId) FloatValueRecord {
+	return FloatValueRecord{"Float", f, typeId}
+}
+
 type BoolValueRecord struct {
 	Kind   string `json:"kind"`
 	B      bool   `json:"b"`
