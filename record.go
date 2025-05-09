@@ -56,18 +56,9 @@ func (receiver FunctionRecord) MarshalJson() ([]byte, error) {
 	return json.Marshal(RawFunctionRecord{receiver})
 }
 
-type ArgRecord struct {
-	Name  string      `json:"name"`
-	Value ValueRecord `json:"value"`
-}
-
-func (receiver ArgRecord) MarshalJson() ([]byte, error) {
-	return json.Marshal(receiver)
-}
-
 type CallRecord struct {
 	FunctionId FunctionId  `json:"function_id"`
-	Args       []ArgRecord `json:"args"`
+	Args       []FullValueRecord `json:"args"`
 }
 
 func (c CallRecord) isRecordEvent() bool {
@@ -240,20 +231,21 @@ func (t *TraceRecord) RegisterStep(path string, line Line) {
 }
 
 // naming copied from DWARF: definition path and definition line
-func (t *TraceRecord) RegisterCall(name string, definitionPath string, definitionLine Line, args []ArgRecord) {
+func (t *TraceRecord) RegisterCall(name string, definitionPath string, definitionLine Line, args []FullValueRecord) {
 	definitionPathId := t.EnsurePathId(definitionPath)
 	t.RegisterCallWithPathId(name, definitionPathId, definitionLine, args)
 }
 
-func (t *TraceRecord) RegisterCallWithPathId(name string, definitionPathId PathId, definitionLine Line, args []ArgRecord) {
+func (t *TraceRecord) RegisterCallWithPathId(name string, definitionPathId PathId, definitionLine Line, args []FullValueRecord) {
 	functionId := t.EnsureFunctionId(name, definitionPathId, definitionLine)
 	call := CallRecord{functionId, args}
 	t.Register(call)
 	t.currentCallsCount += 1
 }
 
-func Arg(name string, value ValueRecord) ArgRecord {
-	return ArgRecord {name, value}
+func (t *TraceRecord) Arg(name string, value ValueRecord) FullValueRecord {
+	variable_id := t.EnsureVariableId(name)
+	return FullValueRecord {variable_id, value}
 }
 
 func (t *TraceRecord) CurrentCallsCount() int {

@@ -26,12 +26,12 @@ func TestTraceRecordHelpers(t *testing.T) {
 		t.Errorf("expected TypeId 0 for type Int")
 	}
 
-	record.RegisterCall("<toplevel>", path0, ct.Line(0), []ct.ArgRecord{})
+	record.RegisterCall("<toplevel>", path0, ct.Line(0), []ct.FullValueRecord{})
 	record.RegisterStep(path0, ct.Line(1))
 	record.RegisterVariable("a", ct.IntValue(1, ct.TypeId(0)))
 
-	arg1 := ct.Arg("a", ct.IntValue(1, ct.TypeId(0)))
-	record.RegisterCall("example", path1, ct.Line(1), []ct.ArgRecord{arg1})
+	arg1 := record.Arg("a", ct.IntValue(1, ct.TypeId(0)))
+	record.RegisterCall("example", path1, ct.Line(1), []ct.FullValueRecord{arg1})
 
 	record.RegisterRecordEvent(ct.EventKindWriteOther, "write_bytes: #52", "0000x")
 
