@@ -95,9 +95,9 @@ func StringValue(text string, typeId TypeId) StringValueRecord {
 }
 
 type StructValueRecord struct {
-	Kind   string `json:"kind"`
-	Fields []ValueRecord
-	TypeId TypeId `json:"type_id"`
+	Kind   string        `json:"kind"`
+	Fields []ValueRecord `json:"field_values"`
+	TypeId TypeId        `json:"type_id"`
 }
 
 func (s StructValueRecord) IsValueRecord() {}
