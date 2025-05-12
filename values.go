@@ -134,12 +134,13 @@ func SequenceValue(elements []ValueRecord, isSlice bool, typeId TypeId) Sequence
 type ReferenceValueRecord struct {
 	Kind         string      `json:"kind"`
 	Dereferenced ValueRecord `json:"dereferenced"`
+	Address      uint32      `json:"address"`
 	Mutable      bool        `json:"mutable"`
 	TypeId       TypeId      `json:"type_id"`
 }
 
 func (s ReferenceValueRecord) IsValueRecord() {}
 
-func ReferenceValue(dereferenced ValueRecord, mutable bool, typeId TypeId) ReferenceValueRecord {
-	return ReferenceValueRecord{"Reference", dereferenced, mutable, typeId}
+func ReferenceValue(dereferenced ValueRecord, address uint32, mutable bool, typeId TypeId) ReferenceValueRecord {
+	return ReferenceValueRecord{"Reference", dereferenced, address, mutable, typeId}
 }
