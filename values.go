@@ -12,16 +12,14 @@ type TypeKind uint8
 // }
 
 type TypeSpecificInfo interface {
-	IsTypeSpecificInfo() bool
+	IsTypeSpecificInfo()
 }
 
 type NoneTypeSpecificInfo struct {
 	Kind string `json:"kind"`
 }
 
-func (i NoneTypeSpecificInfo) IsTypeSpecificInfo() bool {
-	return true
-}
+func (i NoneTypeSpecificInfo) IsTypeSpecificInfo() {}
 
 func NewNonTypeSpecificInfo() NoneTypeSpecificInfo {
 	return NoneTypeSpecificInfo{"None"}
@@ -40,6 +38,35 @@ type TypeRecord struct {
 
 func NewSimpleTypeRecord(kind TypeKind, langType string) TypeRecord {
 	return TypeRecord{kind, langType, NewNonTypeSpecificInfo()}
+}
+
+type FieldTypeRecord struct {
+	Name   string `json:"name"`
+	TypeId TypeId `json:"type_id"`
+}
+
+func NewFieldTypeRecord(name string, typeId TypeId) FieldTypeRecord {
+	return FieldTypeRecord{name, typeId}
+}
+
+type StructTypeInfo struct {
+	Fields []FieldTypeRecord `json:"fields"`
+}
+
+func (i StructTypeInfo) IsTypeSpecificInfo() {}
+
+func NewStructTypeInfo(fields []FieldTypeRecord) StructTypeInfo {
+	return StructTypeInfo{fields}
+}
+
+type PointerTypeInfo struct {
+	DereferenceTypeId TypeId `json:"dereference_type_id"`
+}
+
+func (i PointerTypeInfo) IsTypeSpecificInfo() {}
+
+func NewPointerTypeInfo(typeId TypeId) PointerTypeInfo {
+	return PointerTypeInfo{typeId}
 }
 
 type ValueRecord interface {
