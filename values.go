@@ -40,6 +40,10 @@ func NewSimpleTypeRecord(kind TypeKind, langType string) TypeRecord {
 	return TypeRecord{kind, langType, NewNonTypeSpecificInfo()}
 }
 
+func NewTypeRecord(kind TypeKind, langType string, specificInfo TypeSpecificInfo) TypeRecord {
+	return TypeRecord{kind, langType, specificInfo}
+}
+
 type FieldTypeRecord struct {
 	Name   string `json:"name"`
 	TypeId TypeId `json:"type_id"`
