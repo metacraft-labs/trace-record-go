@@ -26,6 +26,10 @@ func NewNonTypeSpecificInfo() NoneTypeSpecificInfo {
 }
 
 const INT_TYPE_KIND = TypeKind(7)
+const FLOAT_TYPE_KIND = TypeKind(8)
+const POINTER_TYPE_KIND = TypeKind(23)
+const ARRAY_TYPE_KIND = TypeKind(4)
+const SLICE_TYPE_KIND = TypeKind(33)
 const BOOL_TYPE_KIND = TypeKind(12)
 const STRING_TYPE_KIND = TypeKind(9)
 const STRUCT_TYPE_KIND = TypeKind(6)
