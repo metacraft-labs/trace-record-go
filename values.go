@@ -26,9 +26,9 @@ func NewNonTypeSpecificInfo() NoneTypeSpecificInfo {
 }
 
 const INT_TYPE_KIND = TypeKind(7)
-const BOOL_TYPE_KIND = TypeKind(8)
+const BOOL_TYPE_KIND = TypeKind(12)
 const STRING_TYPE_KIND = TypeKind(9)
-const STRUCT_TYPE_KIND = TypeKind(10)
+const STRUCT_TYPE_KIND = TypeKind(6)
 
 type TypeRecord struct {
 	Kind         TypeKind         `json:"kind"`
