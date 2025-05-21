@@ -54,13 +54,14 @@ func NewFieldTypeRecord(name string, typeId TypeId) FieldTypeRecord {
 }
 
 type StructTypeInfo struct {
+	Kind   string            `json:"kind"`
 	Fields []FieldTypeRecord `json:"fields"`
 }
 
 func (i StructTypeInfo) IsTypeSpecificInfo() {}
 
 func NewStructTypeInfo(fields []FieldTypeRecord) StructTypeInfo {
-	return StructTypeInfo{fields}
+	return StructTypeInfo{Kind: "Struct", Fields: fields}
 }
 
 type PointerTypeInfo struct {
