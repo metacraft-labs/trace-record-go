@@ -69,13 +69,14 @@ func NewStructTypeInfo(fields []FieldTypeRecord) StructTypeInfo {
 }
 
 type PointerTypeInfo struct {
+	Kind   string            `json:"kind"`
 	DereferenceTypeId TypeId `json:"dereference_type_id"`
 }
 
 func (i PointerTypeInfo) IsTypeSpecificInfo() {}
 
 func NewPointerTypeInfo(typeId TypeId) PointerTypeInfo {
-	return PointerTypeInfo{typeId}
+	return PointerTypeInfo{"Pointer", typeId}
 }
 
 type ValueRecord interface {
