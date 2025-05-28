@@ -28,6 +28,7 @@ func NewNonTypeSpecificInfo() NoneTypeSpecificInfo {
 const INT_TYPE_KIND = TypeKind(7)
 const FLOAT_TYPE_KIND = TypeKind(8)
 const POINTER_TYPE_KIND = TypeKind(23)
+const TUPLE_TYPE_KIND = TypeKind(27)
 const ARRAY_TYPE_KIND = TypeKind(4)
 const SLICE_TYPE_KIND = TypeKind(33)
 const BOOL_TYPE_KIND = TypeKind(12)
@@ -69,7 +70,7 @@ func NewStructTypeInfo(fields []FieldTypeRecord) StructTypeInfo {
 }
 
 type PointerTypeInfo struct {
-	Kind   string            `json:"kind"`
+	Kind              string `json:"kind"`
 	DereferenceTypeId TypeId `json:"dereference_type_id"`
 }
 
@@ -180,4 +181,15 @@ func (s ReferenceValueRecord) IsValueRecord() {}
 
 func ReferenceValue(dereferenced ValueRecord, address uint32, mutable bool, typeId TypeId) ReferenceValueRecord {
 	return ReferenceValueRecord{"Reference", dereferenced, address, mutable, typeId}
+}
+
+type TupleValueRecord struct {
+	Elements []ValueRecord `json:"elements"`
+	TypeId   TypeId        `json:"type_id"`
+}
+
+func (s TupleValueRecord) IsValueRecord() {}
+
+func TupleValue(elements []ValueRecord, typeId TypeId) TupleValueRecord {
+	return TupleValueRecord{elements, typeId}
 }
