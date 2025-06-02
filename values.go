@@ -184,6 +184,7 @@ func ReferenceValue(dereferenced ValueRecord, address uint32, mutable bool, type
 }
 
 type TupleValueRecord struct {
+	Kind     string        `json:"kind"`
 	Elements []ValueRecord `json:"elements"`
 	TypeId   TypeId        `json:"type_id"`
 }
@@ -191,5 +192,5 @@ type TupleValueRecord struct {
 func (s TupleValueRecord) IsValueRecord() {}
 
 func TupleValue(elements []ValueRecord, typeId TypeId) TupleValueRecord {
-	return TupleValueRecord{elements, typeId}
+	return TupleValueRecord{"Tuple", elements, typeId}
 }
