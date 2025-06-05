@@ -194,3 +194,15 @@ func (s TupleValueRecord) IsValueRecord() {}
 func TupleValue(elements []ValueRecord, typeId TypeId) TupleValueRecord {
 	return TupleValueRecord{"Tuple", elements, typeId}
 }
+
+type BigIntValueRecord struct {
+	Kind   string `json:"kind"`
+	Bytes  []byte `json:"b"`
+	TypeId TypeId `json:"type_id"`
+}
+
+func (s BigIntValueRecord) IsValueRecord() {}
+
+func BigIntValue(bytes []byte, typeId TypeId) BigIntValueRecord {
+	return BigIntValueRecord{"BigInt", bytes, typeId}
+}
