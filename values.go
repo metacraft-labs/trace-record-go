@@ -196,13 +196,14 @@ func TupleValue(elements []ValueRecord, typeId TypeId) TupleValueRecord {
 }
 
 type BigIntValueRecord struct {
-	Kind   string `json:"kind"`
-	Bytes  []byte `json:"b"`
-	TypeId TypeId `json:"type_id"`
+	Kind     string `json:"kind"`
+	Bytes    []byte `json:"b"`
+	Negative bool   `json:"negative"`
+	TypeId   TypeId `json:"type_id"`
 }
 
 func (s BigIntValueRecord) IsValueRecord() {}
 
-func BigIntValue(bytes []byte, typeId TypeId) BigIntValueRecord {
-	return BigIntValueRecord{"BigInt", bytes, typeId}
+func BigIntValue(bytes []byte, negative bool, typeId TypeId) BigIntValueRecord {
+	return BigIntValueRecord{"BigInt", bytes, negative, typeId}
 }
