@@ -1,10 +1,12 @@
 package trace_record
 
-import "fmt"
-import "bytes"
-import "os"
-import "path/filepath"
-import "encoding/json"
+import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"os"
+	"path/filepath"
+)
 
 type FunctionId uint64
 type CallId uint64
@@ -57,7 +59,7 @@ func (receiver FunctionRecord) MarshalJson() ([]byte, error) {
 }
 
 type CallRecord struct {
-	FunctionId FunctionId  `json:"function_id"`
+	FunctionId FunctionId        `json:"function_id"`
 	Args       []FullValueRecord `json:"args"`
 }
 
@@ -146,6 +148,7 @@ const (
 	EventKindError
 	// used for trace events
 	EventKindTraceLogEvent
+	EventKindEvmEvent
 	// TODO others
 )
 
@@ -198,12 +201,12 @@ func (receiver RawTypeRecord) MarshalJson() ([]byte, error) {
 }
 
 type TraceRecord struct {
-	events    []RecordEvent
-	functions map[string]FunctionId
-	paths     map[string]PathId
-	variables map[string]VariableId
-	types     map[string]TypeId
-	currentCallsCount   int
+	events            []RecordEvent
+	functions         map[string]FunctionId
+	paths             map[string]PathId
+	variables         map[string]VariableId
+	types             map[string]TypeId
+	currentCallsCount int
 }
 
 func MakeTraceRecord() TraceRecord {
@@ -245,7 +248,7 @@ func (t *TraceRecord) RegisterCallWithPathId(name string, definitionPathId PathI
 
 func (t *TraceRecord) Arg(name string, value ValueRecord) FullValueRecord {
 	variable_id := t.EnsureVariableId(name)
-	return FullValueRecord {variable_id, value}
+	return FullValueRecord{variable_id, value}
 }
 
 func (t *TraceRecord) CurrentCallsCount() int {
@@ -405,9 +408,8 @@ func (record *TraceRecord) ProduceTrace(traceDirectory string, programName strin
 
 	paths := make([]string, 0)
 	for _, event := range record.events {
-		switch event.(type) {
+		switch pathRecord := event.(type) {
 		case PathRecord:
-			pathRecord, _ := event.(PathRecord) // fmt.Fprint("%v", event)
 			path := string(pathRecord)
 			paths = append(paths, path)
 		default:
